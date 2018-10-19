@@ -4,12 +4,17 @@ from std_msgs.msg import Int32
 from geometry_msgs.msg import PoseStamped, Pose
 from styx_msgs.msg import TrafficLightArray, TrafficLight
 from styx_msgs.msg import Lane
+#from styx_msgs.msg import TLStatus
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 from light_classification.tl_classifier import TLClassifier
 import tf
 import cv2
 import yaml
+import math
+import time
+import numpy as np
+
 
 STATE_COUNT_THRESHOLD = 3
 
@@ -101,7 +106,17 @@ class TLDetector(object):
 
         """
         #TODO implement
-        return 0
+        x = pose.position.x
+        y = pose.position.y
+        for i, waypoint in enumerate(self, waypoints):
+            wx = waypoint.pose.pose.position.x
+            wy = waypoint.pose.pose.position.y
+            d = math.hypot(x-wx, y-wy)
+            if(d < mind):
+                mind = d
+                mini = i
+        
+        return mini
 
     def get_light_state(self, light):
         """Determines the current color of the traffic light
@@ -140,6 +155,7 @@ class TLDetector(object):
 
         #TODO find the closest visible traffic light (if one exists)
 
+        
         if light:
             state = self.get_light_state(light)
             return light_wp, state
