@@ -59,13 +59,6 @@ class WaypointUpdater(object):
             if self.pose and self.base_lane:
                 self.publish_waypoints()
             rate.sleep()
-            
-            #if self.pose and self.base_waypoints:
-                # Get closest waypoint
-             #   closest_waypoint_idx = self.get_closest_waypoint_idx()
-                #self.publish_waypoints(closest_waypoint_idx)
-                #self.publish_waypoints(-1)
-             #rate.sleep()
 
     def get_closest_waypoint_idx(self):
         x = self.pose.pose.position.x
@@ -100,7 +93,8 @@ class WaypointUpdater(object):
         closest_idx = self.get_closest_waypoint_idx()
         farthest_idx = closest_idx + LOOKAHEAD_WPS
         base_waypoints = self.base_lane.waypoints[closest_idx:farthest_idx]
-        rospy.loginfo("Waypoint_updater generate_lane {} {}".format(closest_idx, farthest_idx))
+        npts = len(self.base_lane.waypoints)
+        rospy.loginfo("Waypoint_updater generate_lane {} {} {}".format(closest_idx, farthest_idx, npts))
 
         if self.stopline_wp_idx == -1 or (self.stopline_wp_idx >= farthest_idx):
             lane.waypoints = base_waypoints
