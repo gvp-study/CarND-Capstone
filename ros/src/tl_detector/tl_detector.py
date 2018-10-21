@@ -60,7 +60,7 @@ class TLDetector(object):
         rospy.spin()
 
     def pose_cb(self, msg):
-        rospy.loginfo("TL_detector pose_cb")
+        rospy.loginfo("TL_detector pose_cb %s", msg)
         self.pose = msg
 
     def waypoints_cb(self, waypoints):
@@ -105,7 +105,7 @@ class TLDetector(object):
         rospy.loginfo("TL_detector image_cb {}".format(self.state_count))
         self.state_count += 1
 
-    def get_closest_waypoint(self, pose):
+    def get_closest_waypoint(self, x, y):
         """Identifies the closest path waypoint to the given position
             https://en.wikipedia.org/wiki/Closest_pair_of_points_problem
         Args:
@@ -117,8 +117,8 @@ class TLDetector(object):
         """
         #TODO implement
 
-        x = pose.position.x
-        y = pose.position.y
+#        x = pose.position.x
+#        y = pose.position.y
         closest_idx = 0
         if self.waypoint_tree is not None:
             closest_idx = self.waypoint_tree.query([x, y], 1)[1]
@@ -171,7 +171,7 @@ class TLDetector(object):
                 line = stop_line_positions[i]
                 temp_wp_idx = self.get_closest_waypoint(line[0], line[1])
                 # Find closest stop line waypoint index
-                d = tem_wp_idx - car_wp_idx
+                d = temp_wp_idx - car_wp_idx
                 if d >= 0 and d < diff:
                     diff = d
                     closest_light = light
