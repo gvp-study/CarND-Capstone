@@ -105,10 +105,6 @@ class WaypointUpdater(object):
             
         return lane
         
-    def generate_waypoints(self):
-        final_lane = self.generate_lane()
-        self.final_waypoints_pub.publish(final_lane)
-
     def decelerate_waypoints(self, waypoints, closest_idx):
         temp = []
         rospy.loginfo("Waypoint_updater decelerate waypoints closest_idx stop_idx {} {}".format(closest_idx, self.stopline_wp_idx))
