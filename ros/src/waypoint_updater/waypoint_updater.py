@@ -68,18 +68,20 @@ class WaypointUpdater(object):
             closest_idx = self.waypoint_tree.query([x, y], 1)[1]
 
         # Check if closest is ahed or behind vehicle.
-        closest_coord = self.waypoints_2d[closest_idx]
-        prev_coord = self.waypoints_2d[closest_idx-1]
+        if self.waypoints_2d is not None:
+            closest_coord = self.waypoints_2d[closest_idx]
+            prev_coord = self.waypoints_2d[closest_idx-1]
 
-        # Equation for hyperplane through closest coords
-        cl_vect = np.array(closest_coord)
-        prev_vect = np.array(prev_coord)
-        pos_vect = np.array([x, y])
+            # Equation for hyperplane through closest coords
+            cl_vect = np.array(closest_coord)
+            prev_vect = np.array(prev_coord)
+            pos_vect = np.array([x, y])
         
-        val = np.dot(cl_vect-prev_vect, pos_vect-cl_vect);
+            val = np.dot(cl_vect-prev_vect, pos_vect-cl_vect);
 
-        if(val > 0):
-            closest_idx = (closest_idx + 1) % len(self.waypoints_2d)
+            if(val > 0):
+                closest_idx = (closest_idx + 1) % len(self.waypoints_2d)
+        
         return closest_idx
 
     def publish_waypoints(self):
@@ -94,12 +96,13 @@ class WaypointUpdater(object):
         farthest_idx = closest_idx + LOOKAHEAD_WPS
         base_waypoints = self.base_lane.waypoints[closest_idx:farthest_idx]
         npts = len(self.base_lane.waypoints)
-        rospy.loginfo("Waypoint_updater generate_lane {} {} {}".format(closest_idx, farthest_idx, npts))
 
         if self.stopline_wp_idx == -1 or (self.stopline_wp_idx >= farthest_idx):
             lane.waypoints = base_waypoints
         else:
             lane.waypoints = self.decelerate_waypoints(base_waypoints, closest_idx)
+            rospy.loginfo("Waypoint_updater generate_lane Decelerate {} {} {}".format(closest_idx, farthest_idx, self.stopline_wp_idx))
+            
         return lane
         
     def generate_waypoints(self):
@@ -108,7 +111,7 @@ class WaypointUpdater(object):
 
     def decelerate_waypoints(self, waypoints, closest_idx):
         temp = []
-        rospy.loginfo("Waypoint_updater decelerate waypoints")
+        rospy.loginfo("Waypoint_updater decelerate waypoints closest_idx stop_idx {} {}".format(closest_idx, self.stopline_wp_idx))
         for i, wp in enumerate(waypoints):
 
             p = Waypoint()
