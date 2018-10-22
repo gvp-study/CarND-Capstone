@@ -3,25 +3,40 @@
 
 ** Capstone Project **
 
-The goal of this project is to integrate a ROS system which incorporates a traffic light detector on a self driving car with the drive by wire system of the car and lets it follow a list of waypoints in the road while obeying the traffic lights.
+The goal of this project is to integrate a ROS system which incorporates a traffic light detector on a self driving car with the drive by wire system of the car that lets it follow a list of waypoints in the road while obeying the traffic lights along the way.
 
+[//]: # (Image References)
+[image1]: ./examples/final-project-ros-graph-v2.png
+[image2]: ./examples/waypoint-updater-ros-graph.png
+[image3]: ./examples/tl-detector-ros-graph.png
+[image4]: ,/examples/dbw-node-ros-graph.png
+[video1]: ,/examples/capstone.mp4
 
 ## [Rubric Points](https://review.udacity.com/#!/rubrics/1140/view)
 All the code for this project has been derived from the example code in the course and is in this directory.
 [Here](https://github.com/gvp-study/CarND-Capstone.git)
 
 # ROS
-## Implementing the SDC with Traffic Light Detection
+## Implementing the Self Driving Car with Traffic Light Detection
 
-I implemented this project based on the lessons and the code walk through done by the instructors. I found that the bulk of the time I spent was on getting the subsystems working together into a whole.
+I implemented this project based on the lessons and the code walk through done by the instructors. The bulk of the time I spent was on getting the subsystems working together. The figure below shows the system architecture.
+![alt text][image1]
 
-Due to time constraints I was unable to join a team in my cohort. When I did register with a team, the team members individually decided to implement the modules by themselves. So I decided to follow suit and do all the modules by myself. Unfortunately, I was not able to implement the tl_detector/light_classification module with real images.
+Due to time constraints I was unable to join a team in my cohort. When I did register with a team, the team members individually decided to implement the modules by themselves. So I decided to follow suit and do all the modules by myself. Unfortunately, I was not able to implement the tl_detector/light_classification module with real images in time for the project submission date. I hope to complete this if I get an extension.
 
 ## Waypoint Updater
-The track the car navigates through is represented by a series of waypoints recorded in a map file. The waypoint_updater.py file updates the map points that the car has to follow in space and time based on the state of the traffic lights.
+The track the car navigates through is represented by a series of waypoints recorded in a map file. The waypoint_updater.py file updates the waypoints that the car has to follow in space and time based on the state of the traffic lights.
+![alt text][image2]
+
 
 ## Traffic Light Detector
 The tl_detector.py file sets up a image processing routine which will subscribe to the /image_color topic and compute the trajectory as a set of waypoints with the correct velocities. These waypoints are computed for a fixed look ahead distance and will have velocities adjusted to make sure they decelerate gently to a stop if the traffic light is red and smoothly accelerate to full speed when the traffic light is green.
+![alt text][image3]
 
 ## DBW Node
 The dbw_node.py file subscribes to a /twist_cmd topic and computes the throttle brake and steering values of the car and publishes them.
+![alt text][image4]
+
+### Output
+The movie of the simulator driven with this ROS system.[link to my video](./examples/capstone.mp4)
+![alt text][video1]
