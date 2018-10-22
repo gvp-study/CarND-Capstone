@@ -1,9 +1,13 @@
 
 ---
 
-** Capstone Project **
+# Capstone Project
 
 The goal of this project is to integrate a ROS system which incorporates a traffic light detector on a self driving car with the drive by wire system of the car that lets it follow a list of waypoints in the road while obeying the traffic lights along the way.
+
+## Team
+Due to time constraints I was unable to join a team in my cohort. When I did register with a team, the team members individually decided to implement the modules by themselves. So I decided to follow suit and do all the modules by myself. The team details of my signup is as follows:
+Looking for a Team:	Craig Martin	craig@craigmartin.com, Christie English	ChristieEnglish@gmail.com, George V. Paul	gvpsha@gmail.com	Nikola Noxon	nikolanoxon@daimler.com
 
 [//]: # (Image References)
 [image1]: ./examples/final-project-ros-graph-v2.png
@@ -16,8 +20,7 @@ The goal of this project is to integrate a ROS system which incorporates a traff
 All the code for this project has been derived from the example code in the course and is in this directory.
 [Here](https://github.com/gvp-study/CarND-Capstone.git)
 
-# ROS
-## Implementing the Self Driving Car with Traffic Light Detection
+## Implementing the Self Driving Car with Traffic Light Detection using ROS
 
 I implemented this project based on the lessons and the code walk through done by the instructors. The bulk of the time I spent was on getting the subsystems working together. The figure below shows the system architecture.
 ![alt text][image1]
