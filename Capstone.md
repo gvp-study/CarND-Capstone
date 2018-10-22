@@ -13,7 +13,7 @@ Looking for a Team:	Craig Martin	craig@craigmartin.com, Christie English	Christi
 [image1]: ./examples/final-project-ros-graph-v2.png
 [image2]: ./examples/waypoint-updater-ros-graph.png
 [image3]: ./examples/tl-detector-ros-graph.png
-[image4]: ,/examples/dbw-node-ros-graph.png
+[image4]: ./examples/dbw-node-ros-graph.png
 [video1]: ,/examples/capstone.mp4
 
 ## [Rubric Points](https://review.udacity.com/#!/rubrics/1140/view)
