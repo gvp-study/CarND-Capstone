@@ -136,7 +136,6 @@ class TLDetector(object):
 
         """
         # For testing
-        rospy.loginfo("TL_detector get_light_state {}".format(light.state))
         return light.state
     
         # if(not self.has_image):
@@ -162,7 +161,6 @@ class TLDetector(object):
 
         # List of positions that correspond to the line to stop in front of for a given intersection
         stop_line_positions = self.config['stop_line_positions']
-        rospy.loginfo("TL_detector process tl count {}".format(len(self.lights)))
         if(self.pose):
             car_wp_idx = self.get_closest_waypoint(self.pose.pose.position.x, self.pose.pose.position.y)
 
@@ -182,9 +180,9 @@ class TLDetector(object):
         if closest_light:
             state = self.get_light_state(closest_light)
             if(state == TrafficLight.GREEN):
-                rospy.loginfo("TL_detector closest tl GREEN {}".format(line_wp_idx))
+                rospy.loginfo("TL_detector GREEN {}".format(line_wp_idx))
             elif(state == TrafficLight.RED):
-                rospy.loginfo("TL_detector closest tl RED {}".format(line_wp_idx))
+                rospy.loginfo("TL_detector RED {}".format(line_wp_idx))
             return line_wp_idx, state
 
         return -1, TrafficLight.UNKNOWN
