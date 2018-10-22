@@ -18,6 +18,7 @@ import numpy as np
 
 
 STATE_COUNT_THRESHOLD = 3
+UPDATE_RATE = 10
 
 class TLDetector(object):
     def __init__(self):
@@ -57,7 +58,13 @@ class TLDetector(object):
         self.last_wp = -1
         self.state_count = 0
 
-        rospy.spin()
+#        rospy.spin()
+        self.loop()
+
+    def loop(self):
+        rate = rospy.Rate(UPDATE_RATE)
+        while not rospy.is_shutdown():
+            rate.sleep()
 
     def pose_cb(self, msg):
         self.pose = msg
