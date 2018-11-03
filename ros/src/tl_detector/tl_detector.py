@@ -196,14 +196,15 @@ class TLDetector(object):
         #     return False
 
         image_orig = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
-#        x, y = self.project_to_image_plane(light.pose.pose.position)
-        x = 400
-        y = 200
+        x, y = self.project_to_image_plane(light.pose.pose.position)
+        rospy.loginfo("Project world to image X {} Y {}".format(x, y))
+        #x = 400
+        #y = 200
         if (x<0) or (y<0) or (x>=image_orig.shape[1]) or (y>=image_orig.shape[0]):
             return False
 
-        xcrop = 300
-        ycrop = 200
+        xcrop = 100
+        ycrop = 100
         xmin = x - xcrop if (x-xcrop) >= 0 else 0
         ymin = y - ycrop if (y-ycrop) >= 0 else 0
 
@@ -212,7 +213,8 @@ class TLDetector(object):
         ymax = y + ycrop if (y + ycrop) <= image_orig.shape[0]-1 else image_orig.shape[0]-1
         image_cropped = image_orig[ymin:ymax,xmin:xmax]
         image_display = image_cropped.copy()
-        cv2.circle(image_display, (xcrop,ycrop), 10, (255,0,0), 4)
+#        cv2.circle(image_display, (xcrop,ycrop), 10, (255,0,0), 4)
+        cv2.circle(image_display, ((xmax+xmin)/2,(ymax+ymin)/2), 10, (255,0,0), 4)
         image_message = self.bridge.cv2_to_imgmsg(image_display, "bgr8")
         
         self.image_display.publish(image_message)
