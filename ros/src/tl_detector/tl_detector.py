@@ -186,15 +186,17 @@ class TLDetector(object):
         # For testing
 #        return light.state
     
-        # if(not self.has_image):
-        #     self.prev_light_loc = None
-        #     return False
+        if(not self.has_image):
+            self.prev_light_loc = None
+            return False
 
         image_orig = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+        rows = image_orig.shape[0]
+        cols = image_orig.shape[1]
         x, y = self.project_to_image_plane(light.pose.pose.position)
-        rospy.loginfo("Project world to image X {} Y {}".format(x, y))
-        if (x<0) or (y<0) or (x>=image_orig.shape[1]) or (y>=image_orig.shape[0]):
+        if (x<0) or (y<0) or (x>=cols) or (y>=rows):
             return False
+        rospy.loginfo("Project world to image X {} Y {}".format(x, y))
 
         xcrop = 100
         ycrop = 100
@@ -202,8 +204,8 @@ class TLDetector(object):
         ymin = y - ycrop if (y-ycrop) >= 0 else 0
 
         # TODO:
-        xmax = x + xcrop if (x + xcrop) <= image_orig.shape[1]-1 else image_orig.shape[1]-1
-        ymax = y + ycrop if (y + ycrop) <= image_orig.shape[0]-1 else image_orig.shape[0]-1
+        xmax = x + xcrop if (x + xcrop) <= cols-1 else cols-1
+        ymax = y + ycrop if (y + ycrop) <= rows-1 else rows-1
         image_cropped = image_orig[ymin:ymax,xmin:xmax]
         image_display = image_cropped.copy()
         cv2.circle(image_display, (xcrop,ycrop), 10, (255,0,0), 4)
