@@ -1,0 +1,6 @@
+ 22  sudo apt-get update
+   23  sudo apt-get install -y ros-kinetic-dbw-mkz-msgs
+   24  cd /home/workspace/CarND-Capstone/ros
+   25  rosdep install --from-paths src --ignore-src --rosdistro=kinetic -y
+   26  roslaunch launch/styx.launch
+   27  sudo apt-get install python-sip
