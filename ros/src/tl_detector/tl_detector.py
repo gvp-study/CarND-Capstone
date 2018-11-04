@@ -16,7 +16,7 @@ import yaml
 import math
 import time
 import numpy as np
-import PyKDL
+#import PyKDL
 
 
 STATE_COUNT_THRESHOLD = 3
@@ -177,18 +177,8 @@ class TLDetector(object):
         rospy.loginfo("Project P2 world {}".format(P2))
         rospy.loginfo("Project P3 car \n{}".format(P3))
         
-        piw = PyKDL.Vector(point_in_world.x,point_in_world.y,point_in_world.z)
-        R = PyKDL.Rotation.Quaternion(*rot)
-        T = PyKDL.Vector(*trans)
-
-        p_car = R*piw+T
-        rospy.loginfo("Project T {}".format(T))
-        rospy.loginfo("Project R \n{}".format(R))
-        rospy.loginfo("Project piw {}".format(piw))
-        rospy.loginfo("Project p_car {}".format(p_car))
-
-        x = -p_car[1]/p_car[0]*fx + image_width/2 + x_offset
-        y = -p_car[2]/p_car[0]*fx + image_height/2 + y_offset
+        x = -P3[1]/P3[0]*fx + image_width/2 + x_offset
+        y = -P3[2]/P3[0]*fx + image_height/2 + y_offset
 
         return (int(x), int(y))
 
