@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import rospy
 from std_msgs.msg import Int32
-from geometry_msgs.msg import PoseStamped, Pose
+from geometry_msgs.msg import PoseStamped, Pose, PointStamped
 from styx_msgs.msg import TrafficLightArray, TrafficLight
 from styx_msgs.msg import Lane
 #from styx_msgs.msg import TLStatus
@@ -9,7 +9,8 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 from light_classification.tl_classifier import TLClassifier
 from scipy.spatial import KDTree
-import tf
+import tf 
+from tf import transformations
 import cv2
 import yaml
 import math
@@ -141,7 +142,6 @@ class TLDetector(object):
             x (int): x coordinate of target point in image
             y (int): y coordinate of target point in image
         """
-
         fx = self.config['camera_info']['focal_length_x']
         fy = self.config['camera_info']['focal_length_y']
         image_width = self.config['camera_info']['image_width']
@@ -166,15 +166,29 @@ class TLDetector(object):
         y_offset = 340
         fx = f
         fy = f
+
+        T3 = np.array([trans[0], trans[1], trans[2]]).transpose()
+        R2 = tf.transformations.quaternion_matrix(rot)
+        R3 = R2[:3,:3]
+        P2 = np.array([point_in_world.x, point_in_world.y, point_in_world.z]).transpose()
+        P3 = R3.dot(P2) + T3
+        rospy.loginfo("Project T3 {}".format(T3))
+        rospy.loginfo("Project R3 \n{}".format(R3))
+        rospy.loginfo("Project P2 world {}".format(P2))
+        rospy.loginfo("Project P3 car \n{}".format(P3))
+        
         piw = PyKDL.Vector(point_in_world.x,point_in_world.y,point_in_world.z)
         R = PyKDL.Rotation.Quaternion(*rot)
         T = PyKDL.Vector(*trans)
-        p_car = R*piw+T
 
-        # x = -p_car[1]/p_car[0]*fx+image_width/2
-        # y = -p_car[2]/p_car[0]*fx+image_height/2
-        x = -p_car[1]/p_car[0]*fx+image_width/2 + x_offset
-        y = -p_car[2]/p_car[0]*fx+image_height/2+y_offset
+        p_car = R*piw+T
+        rospy.loginfo("Project T {}".format(T))
+        rospy.loginfo("Project R \n{}".format(R))
+        rospy.loginfo("Project piw {}".format(piw))
+        rospy.loginfo("Project p_car {}".format(p_car))
+
+        x = -p_car[1]/p_car[0]*fx + image_width/2 + x_offset
+        y = -p_car[2]/p_car[0]*fx + image_height/2 + y_offset
 
         return (int(x), int(y))
 
@@ -198,8 +212,6 @@ class TLDetector(object):
         image_orig = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
         x, y = self.project_to_image_plane(light.pose.pose.position)
         rospy.loginfo("Project world to image X {} Y {}".format(x, y))
-        #x = 400
-        #y = 200
         if (x<0) or (y<0) or (x>=image_orig.shape[1]) or (y>=image_orig.shape[0]):
             return False
 
