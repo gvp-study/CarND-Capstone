@@ -50,12 +50,8 @@ class TLDetector(object):
         self.config = yaml.load(config_string)
 
         self.upcoming_red_light_pub = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
-
+        # For debugging the image
         self.image_display = rospy.Publisher('/image_proccessed', Image, queue_size=1)
-        #self.active_tl_viz = rospy.Publisher('/wpts', PoseStamped, queue_size=1)
-        #self.tl_viz = rospy.Publisher('tl_viz', MarkerArray, queue_size=1)
-        #self.tl_front_viz = rospy.Publisher('tl_front_viz', Marker, queue_size=1)
-        #self.wp_viz = rospy.Publisher('wp_viz', MarkerArray, queue_size=1)
 
         self.bridge = CvBridge()
         self.light_classifier = TLClassifier()
@@ -159,8 +155,7 @@ class TLDetector(object):
         except (tf.Exception, tf.LookupException, tf.ConnectivityException):
             rospy.logerr("Failed to find camera to map transform")
 
-        #DONE Use tranform and rotation to calculate 2D position of light in image
-        # import ipdb; ipdb.set_trace()
+        # Project traffic light pose in xyz to image pixels.
         f = 2300
         x_offset = -30
         y_offset = 340
@@ -172,13 +167,9 @@ class TLDetector(object):
         R3 = R2[:3,:3]
         P2 = np.array([point_in_world.x, point_in_world.y, point_in_world.z]).transpose()
         P3 = R3.dot(P2) + T3
-        rospy.loginfo("Project T3 {}".format(T3))
-        rospy.loginfo("Project R3 \n{}".format(R3))
-        rospy.loginfo("Project P2 world {}".format(P2))
-        rospy.loginfo("Project P3 car \n{}".format(P3))
         
         x = -P3[1]/P3[0]*fx + image_width/2 + x_offset
-        y = -P3[2]/P3[0]*fx + image_height/2 + y_offset
+        y = -P3[2]/P3[0]*fy + image_height/2 + y_offset
 
         return (int(x), int(y))
 
@@ -215,8 +206,8 @@ class TLDetector(object):
         ymax = y + ycrop if (y + ycrop) <= image_orig.shape[0]-1 else image_orig.shape[0]-1
         image_cropped = image_orig[ymin:ymax,xmin:xmax]
         image_display = image_cropped.copy()
-#        cv2.circle(image_display, (xcrop,ycrop), 10, (255,0,0), 4)
-        cv2.circle(image_display, ((xmax+xmin)/2,(ymax+ymin)/2), 10, (255,0,0), 4)
+        cv2.circle(image_display, (xcrop,ycrop), 10, (255,0,0), 4)
+#        cv2.circle(image_display, ((xmax+xmin)/2,(ymax+ymin)/2), 10, (255,0,0), 4)
         image_message = self.bridge.cv2_to_imgmsg(image_display, "bgr8")
         
         self.image_display.publish(image_message)
