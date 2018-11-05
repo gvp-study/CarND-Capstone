@@ -91,6 +91,8 @@ class TLDetector(object):
             msg (Image): image from car-mounted camera
 
         """
+        rospy.loginfo("Image-CB called")
+
         self.has_image = True
         self.camera_image = msg
         light_wp, state = self.process_traffic_lights()
@@ -188,6 +190,7 @@ class TLDetector(object):
     
         if(not self.has_image):
             self.prev_light_loc = None
+            rospy.loginfo("Project has no image")
             return False
 
         image_orig = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
