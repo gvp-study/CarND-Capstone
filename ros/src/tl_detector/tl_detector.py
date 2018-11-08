@@ -210,17 +210,14 @@ class TLDetector(object):
         xmax = x + xcrop if (x + xcrop) <= cols-1 else cols-1
         ymax = y + ycrop if (y + ycrop) <= rows-1 else rows-1
         image_cropped = image_orig[ymin:ymax,xmin:xmax]
-        image_display = image_cropped.copy()
-        cv2.circle(image_display, (xcrop,ycrop), 10, (255,0,0), 4)
-#        cv2.circle(image_display, ((xmax+xmin)/2,(ymax+ymin)/2), 10, (255,0,0), 4)
-        image_message = self.bridge.cv2_to_imgmsg(image_display, "bgr8")
-        
-        self.image_display.publish(image_message)
 
         #TODO use light location to zoom in on traffic light in image
-
+        state, image_return = self.light_classifier.get_classification(image_cropped)
+        image_message = self.bridge.cv2_to_imgmsg(image_return, "bgr8")
+        
+        self.image_display.publish(image_message)
         #Get classification
-        return self.light_classifier.get_classification(image_cropped)
+        return state
 
     def process_traffic_lights(self):
         """Finds closest visible traffic light, if one exists, and determines its
