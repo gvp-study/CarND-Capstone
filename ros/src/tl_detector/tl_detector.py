@@ -197,7 +197,6 @@ class TLDetector(object):
         x, y = self.project_to_image_plane(light.pose.pose.position)
         if (x<0) or (y<0) or (x>=cols) or (y>=rows):
             return False
-        rospy.loginfo("Project world to image X {} Y {}".format(x, y))
 
         xcrop = 100
         ycrop = 100
