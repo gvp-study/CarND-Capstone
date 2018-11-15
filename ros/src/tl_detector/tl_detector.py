@@ -91,8 +91,6 @@ class TLDetector(object):
             msg (Image): image from car-mounted camera
 
         """
-        rospy.loginfo("Image-CB called")
-
         self.has_image = True
         self.camera_image = msg
         light_wp, state = self.process_traffic_lights()
@@ -212,8 +210,8 @@ class TLDetector(object):
         image_cropped = image_orig[ymin:ymax,xmin:xmax]
 
         #TODO use light location to zoom in on traffic light in image
-        state, image_return = self.light_classifier.get_classification(image_cropped)
-        image_message = self.bridge.cv2_to_imgmsg(image_return, "bgr8")
+        state = self.light_classifier.get_classification(image_cropped)
+        image_message = self.bridge.cv2_to_imgmsg(image_cropped, "bgr8")
         
         self.image_display.publish(image_message)
         #Get classification
