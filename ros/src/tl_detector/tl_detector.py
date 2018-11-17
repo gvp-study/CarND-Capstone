@@ -46,7 +46,7 @@ class TLDetector(object):
         rely on the position of the light and the camera image to predict it.
         '''
         sub3 = rospy.Subscriber('/vehicle/traffic_lights', TrafficLightArray, self.traffic_cb)
-        sub6 = rospy.Subscriber('/image_color', Image, self.image_cb, queue_size=1, buff_size=65536)
+        sub6 = rospy.Subscriber('/image_color', Image, self.image_cb, queue_size=1)
 
         config_string = rospy.get_param("/traffic_light_config")
         self.config = yaml.load(config_string)
@@ -70,8 +70,8 @@ class TLDetector(object):
     def loop(self):
         rate = rospy.Rate(UPDATE_RATE)
         while not rospy.is_shutdown():
-            rospy.loginfo("tl_detector:loop rate {}".format(rate))
-            self.image_cb2()
+            rospy.loginfo("tl_detector:loop rate {} Hz".format(UPDATE_RATE))
+            self.find_traffic_lights()
             rate.sleep()
 
     def pose_cb(self, msg):
@@ -98,7 +98,8 @@ class TLDetector(object):
         self.has_image = True
         self.camera_image = msg
 
-    def image_cb2(self):
+    def find_traffic_lights(self):
+        # Find the traffic light state and the way point related to it.
         light_wp, state = self.process_traffic_lights()
 
         '''
@@ -263,8 +264,9 @@ class TLDetector(object):
                     diff = d
                     closest_light = light
                     line_wp_idx = temp_wp_idx
-#        else:
-#            closest_light = self.lights[0]
+        else:
+            if(len(self.lights) > 0):
+                closest_light = self.lights[0]
         if closest_light:
             state = self.get_light_state(closest_light)
             if(state == TrafficLight.GREEN):
