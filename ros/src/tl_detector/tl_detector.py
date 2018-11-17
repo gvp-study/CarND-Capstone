@@ -20,7 +20,7 @@ import numpy as np
 
 
 STATE_COUNT_THRESHOLD = 3
-UPDATE_RATE = 10
+UPDATE_RATE = 1
 
 class TLDetector(object):
     def __init__(self):
@@ -32,6 +32,8 @@ class TLDetector(object):
         self.waypoints_tree = None
         self.camera_image = None
         self.lights = []
+        self.is_site = True
+        self.has_image = True
 
         sub1 = rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
         sub2 = rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
@@ -44,7 +46,7 @@ class TLDetector(object):
         rely on the position of the light and the camera image to predict it.
         '''
         sub3 = rospy.Subscriber('/vehicle/traffic_lights', TrafficLightArray, self.traffic_cb)
-        sub6 = rospy.Subscriber('/image_color', Image, self.image_cb, queue_size=1)
+        sub6 = rospy.Subscriber('/image_color', Image, self.image_cb, queue_size=1, buff_size=65536)
 
         config_string = rospy.get_param("/traffic_light_config")
         self.config = yaml.load(config_string)
@@ -68,6 +70,8 @@ class TLDetector(object):
     def loop(self):
         rate = rospy.Rate(UPDATE_RATE)
         while not rospy.is_shutdown():
+            rospy.loginfo("tl_detector:loop rate {}".format(rate))
+            self.image_cb2()
             rate.sleep()
 
     def pose_cb(self, msg):
@@ -93,6 +97,8 @@ class TLDetector(object):
         """
         self.has_image = True
         self.camera_image = msg
+
+    def image_cb2(self):
         light_wp, state = self.process_traffic_lights()
 
         '''
@@ -142,19 +148,22 @@ class TLDetector(object):
         fy = self.config['camera_info']['focal_length_y']
         image_width = self.config['camera_info']['image_width']
         image_height = self.config['camera_info']['image_height']
+        rospy.loginfo("project_to_image called {} {} : f {} {}".format(image_width, image_height, fx, fy))
 
         # get transform between pose of camera and world frame
         trans = None
+        rot = None
         try:
             now = rospy.Time.now()
             self.listener.waitForTransform("/base_link",
                   "/world", now, rospy.Duration(1.0))
             (trans, rot) = self.listener.lookupTransform("/base_link",
                   "/world", now)
-
+            self.is_site = False
         except (tf.Exception, tf.LookupException, tf.ConnectivityException):
             rospy.logerr("Failed to find camera to map transform")
-
+            self.is_site = True
+            return (None, None)
         # Project traffic light pose in xyz to image pixels.
         f = 2300
         x_offset = -30
@@ -185,7 +194,13 @@ class TLDetector(object):
         """
         # For testing
 #        return light.state
-    
+        if(not light):
+            rospy.loginfo("Bad Light")
+            return False
+        if(not self.camera_image):
+            rospy.loginfo("Bad Image")
+            return False
+        
         if(not self.has_image):
             self.prev_light_loc = None
             rospy.loginfo("Project has no image")
@@ -196,9 +211,10 @@ class TLDetector(object):
         cols = image_orig.shape[1]
         x, y = self.project_to_image_plane(light.pose.pose.position)
         if (x<0) or (y<0) or (x>=cols) or (y>=rows):
+            self.has_image = False
             return False
 
-        xcrop = 100
+        xcrop = 50
         ycrop = 100
         xmin = x - xcrop if (x-xcrop) >= 0 else 0
         ymin = y - ycrop if (y-ycrop) >= 0 else 0
@@ -214,6 +230,7 @@ class TLDetector(object):
         
         self.image_display.publish(image_message)
         #Get classification
+        self.has_image = False
         return state
 
     def process_traffic_lights(self):
@@ -246,7 +263,8 @@ class TLDetector(object):
                     diff = d
                     closest_light = light
                     line_wp_idx = temp_wp_idx
-
+#        else:
+#            closest_light = self.lights[0]
         if closest_light:
             state = self.get_light_state(closest_light)
             if(state == TrafficLight.GREEN):
