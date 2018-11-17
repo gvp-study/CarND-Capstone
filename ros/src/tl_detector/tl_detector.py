@@ -20,7 +20,7 @@ import numpy as np
 
 
 STATE_COUNT_THRESHOLD = 3
-UPDATE_RATE = 1
+UPDATE_RATE = 2
 
 class TLDetector(object):
     def __init__(self):
@@ -70,7 +70,6 @@ class TLDetector(object):
     def loop(self):
         rate = rospy.Rate(UPDATE_RATE)
         while not rospy.is_shutdown():
-            rospy.loginfo("tl_detector:loop rate {} Hz".format(UPDATE_RATE))
             self.find_traffic_lights()
             rate.sleep()
 
