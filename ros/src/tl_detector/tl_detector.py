@@ -205,15 +205,18 @@ class TLDetector(object):
             self.prev_light_loc = None
             rospy.loginfo("Project has no image")
             return False
-
+        else:
+            rospy.loginfo("Project got an image")
         image_orig = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+        box, state = self.light_classifier.get_classification(image_orig)
         rows = image_orig.shape[0]
         cols = image_orig.shape[1]
         x, y = self.project_to_image_plane(light.pose.pose.position)
+        '''
         if (x<0) or (y<0) or (x>=cols) or (y>=rows):
             self.has_image = False
             return False
-
+            
         xcrop = 50
         ycrop = 100
         xmin = x - xcrop if (x-xcrop) >= 0 else 0
@@ -222,10 +225,18 @@ class TLDetector(object):
         # TODO:
         xmax = x + xcrop if (x + xcrop) <= cols-1 else cols-1
         ymax = y + ycrop if (y + ycrop) <= rows-1 else rows-1
+        '''
+        if(box != None):
+            xmin, xmax, ymin, ymax = box
+        else:
+            xmin = 0
+            ymin = 0
+            xmax = cols
+            ymax = rows
         image_cropped = image_orig[ymin:ymax,xmin:xmax]
-
+#        image_cropped = image_orig[0:rows,0:cols]
         #TODO use light location to zoom in on traffic light in image
-        state = self.light_classifier.get_classification(image_cropped)
+        #state = self.light_classifier.get_classification(image_cropped)
         image_message = self.bridge.cv2_to_imgmsg(image_cropped, "bgr8")
         
         self.image_display.publish(image_message)
