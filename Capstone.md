@@ -25,8 +25,6 @@ All the code for this project has been derived from the example code in the cour
 I implemented this project based on the lessons and the code walk through done by the instructors. The bulk of the time I spent was on getting the subsystems working together. The figure below shows the system architecture.
 ![alt text][image1]
 
-Note that I have not implemented the tl_detector/image_classification module due to time constraints. I hope to finish this and submit a complete project in the coming weeks.
-
 ## Waypoint Updater
 The track the car navigates through is represented by a series of waypoints recorded in a map file. The waypoint_updater.py file updates the waypoints that the car has to follow in space and time based on the state of the traffic lights.
 ![alt text][image2]
@@ -36,6 +34,8 @@ The track the car navigates through is represented by a series of waypoints reco
 The tl_detector.py file sets up a image processing routine which will subscribe to the /image_color topic and compute the trajectory as a set of waypoints along with appropriate velocities. These waypoints are computed for a fixed look ahead distance and will have velocities adjusted to make sure they decelerate gently to a stop if the traffic light is red and smoothly accelerate to full speed when the traffic light is green.
 ![alt text][image3]
 
+In this version, I use a two step method to implement the tl_detector/image_classification module. The first step detects the traffic light in the image if there is one and the second step classifies the detected traffic light for the color. This particular implementation uses Tensorflow object detection using a pretrained model from the COCO dataset for the first step. Once the traffic light is detected and the bounding box found, a second network is used to recognize the state of the traffic light as being green, yellow or red. The two networks operate in series on every camera image from the car.
+
 ## DBW Node
 The dbw_node.py file subscribes to a /twist_cmd topic and computes the throttle brake and steering values of the car based on the velocities set in the waypoints and publishes them.
 ![alt text][image4]
@@ -43,3 +43,6 @@ The dbw_node.py file subscribes to a /twist_cmd topic and computes the throttle 
 ### Output
 The movie of the simulator driven with this ROS system.[link to my video](./examples/capstone.mp4)
 ![alt text][video1]
+
+### References
+https://medium.com/@WuStangDan/step-by-step-tensorflow-object-detection-api-tutorial-part-1-selecting-a-model-a02b6aabe39e
